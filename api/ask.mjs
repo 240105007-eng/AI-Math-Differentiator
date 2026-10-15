@@ -51,7 +51,7 @@ guide the student back to quadratic equations.
 `;
 
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+      "https://generativelanguage.googleapis.com/v1beta/interactions",
       {
         method: "POST",
         headers: {
@@ -59,14 +59,12 @@ guide the student back to quadratic equations.
           "x-goog-api-key": apiKey
         },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: prompt }]
-            }
-          ],
-          generationConfig: {
+          model: "gemini-3.8-flash",
+          input: prompt,
+          store: false,
+          generation_config: {
             temperature: 0.3,
-            maxOutputTokens: 800
+            max_output_tokens: 800
           }
         })
       }
@@ -75,7 +73,11 @@ guide the student back to quadratic equations.
     const data = await response.json();
 
     if (!response.ok) {
-      console.error("Gemini API error:", data.error?.message);
+      console.error(
+        "Gemini API error:",
+        response.status,
+        data.error?.message
+      );
 
       return res.status(502).json({
         error: "Gemini could not answer. Please try again."
@@ -83,12 +85,18 @@ guide the student back to quadratic equations.
     }
 
     const answer =
-      data.candidates?.[0]?.content?.parts
-        ?.map(part => part.text || "")
+      data.output_text ||
+      data.output
+        ?.filter(item => item.type === "message")
+        .flatMap(item => item.content || [])
+        .filter(part => part.type === "text")
+        .map(part => part.text || "")
         .join("")
         .trim();
 
     if (!answer) {
+      console.error("Gemini returned no text:", JSON.stringify(data));
+
       return res.status(502).json({
         error: "No answer was returned. Please try again."
       });
