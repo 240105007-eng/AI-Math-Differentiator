@@ -785,5 +785,76 @@
 
   </script>
 
+<section id="ai-math-tutor" style="max-width:800px;margin:40px auto;padding:24px;background:#f2f7ff;border-radius:16px;font-family:Arial,sans-serif;">
+  <h2>AI Math Tutor</h2>
+  <p>Ask Gemini for help with quadratic equations.</p>
+
+  <label for="ai-level">Choose your level:</label>
+  <select id="ai-level" style="display:block;margin:8px 0 16px;padding:10px;width:100%;">
+    <option value="Foundation">Foundation</option>
+    <option value="Standard">Standard</option>
+    <option value="Advanced">Advanced</option>
+  </select>
+
+  <label for="ai-question">Your math question:</label>
+  <textarea id="ai-question" maxlength="2000"
+    placeholder="Example: Help me solve x² - 5x + 6 = 0"
+    style="display:block;box-sizing:border-box;width:100%;min-height:100px;padding:12px;margin:8px 0 12px;"></textarea>
+
+  <button id="ai-ask-button" type="button"
+    style="padding:12px 20px;background:#2563eb;color:white;border:0;border-radius:8px;cursor:pointer;">
+    Ask AI Tutor
+  </button>
+
+  <div id="ai-status" role="status" aria-live="polite" style="margin-top:16px;white-space:pre-wrap;"></div>
+  <div id="ai-answer" style="margin-top:12px;padding:16px;background:white;border-radius:8px;white-space:pre-wrap;line-height:1.6;"></div>
+</section>
+
+<script>
+(() => {
+  const button = document.getElementById("ai-ask-button");
+  const questionInput = document.getElementById("ai-question");
+  const levelInput = document.getElementById("ai-level");
+  const status = document.getElementById("ai-status");
+  const answer = document.getElementById("ai-answer");
+
+  button.addEventListener("click", async () => {
+    const question = questionInput.value.trim();
+    const level = levelInput.value;
+
+    if (!question) {
+      status.textContent = "Please enter a math question first.";
+      return;
+    }
+
+    button.disabled = true;
+    status.textContent = "Thinking... Please wait.";
+    answer.textContent = "";
+
+    try {
+      const response = await fetch("/api/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question, level })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "The AI request failed.");
+      }
+
+      status.textContent = "Answer:";
+      answer.textContent = data.answer;
+    } catch (error) {
+      status.textContent =
+        "Sorry, the AI tutor could not respond. " + error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
