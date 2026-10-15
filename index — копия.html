@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>AI Math Differentiator</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 30px 20px;
+      background: #f3f5fb;
+      color: #26324b;
+    }
+
+    header {
+      text-align: center;
+      padding: 25px 10px;
+    }
+
+    header h1 {
+      margin-bottom: 10px;
+    }
+
+    header p {
+      color: #65718a;
+      line-height: 1.6;
+    }
+
+    .card {
+      background: white;
+      padding: 24px;
+      margin: 20px 0;
+      border-radius: 16px;
+      box-shadow: 0 4px 18px #24304712;
+    }
+
+    .levels {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button {
+      border: none;
+      padding: 12px 16px;
+      border-radius: 9px;
+      background: #405bd5;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #2d43ad;
+    }
+
+    .secondary {
+      background: #e8ecfa;
+      color: #293d91;
+    }
+
+    .secondary:hover {
+      background: #d7def7;
+    }
+
+    .level-label {
+      color: #405bd5;
+      font-weight: bold;
+    }
+
+    #problem {
+      font-size: 30px;
+      font-weight: bold;
+      text-align: center;
+      padding: 20px 5px;
+    }
+
+    #description {
+      line-height: 1.6;
+    }
+
+    .answer-section {
+      margin-top: 25px;
+    }
+
+    .answer-section label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    #studentAnswer {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #ccd2e0;
+      border-radius: 8px;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    #studentAnswer:focus {
+      outline: none;
+      border-color: #405bd5;
+    }
+
+    .result {
+      background: #f4f6fc;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 16px;
+      line-height: 1.7;
+      white-space: pre-line;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .correct {
+      background: #e8f7ed;
+      color: #176b36;
+    }
+
+    .incorrect {
+      background: #fff0f0;
+      color: #a52a2a;
+    }
+
+    .note {
+      font-size: 13px;
+      color: #727d91;
+      line-height: 1.6;
+      margin-top: 20px;
+    }
+
+    footer {
+      text-align: center;
+      color: #727d91;
+      font-size: 13px;
+      padding: 20px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 15px;
+      }
+
+      .card {
+        padding: 18px;
+      }
+
+      .levels button {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>AI Math Differentiator</h1>
+
+    <p>
+      Learn quadratic equations at your own level.
+      Choose a difficulty level, solve the problem,
+      and receive guidance.
+    </p>
+  </header>
+
+
+  <main>
+
+    <!-- Difficulty selection -->
+
+    <section class="card">
+
+      <h2>Choose your difficulty</h2>
+
+      <p>
+        Select the level that matches your current learning needs.
+      </p>
+
+      <div class="levels">
+
+        <button onclick="selectLevel('foundation')">
+          Level 1: Foundation
+        </button>
+
+        <button onclick="selectLevel('standard')">
+          Level 2: Standard
+        </button>
+
+        <button onclick="selectLevel('advanced')">
+          Level 3: Advanced
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- Problem section -->
+
+    <section class="card">
+
+      <p class="level-label" id="level">
+        LEVEL 1 — FOUNDATION
+      </p>
+
+      <h2>Practice Problem</h2>
+
+      <p id="description">
+        Solve a simple quadratic equation using factorisation.
+      </p>
+
+      <div id="problem">
+        x² − 5x + 6 = 0
+      </div>
+
+
+      <!-- Buttons -->
+
+      <button onclick="showHint()">
+        Show Hint
+      </button>
+
+      <button onclick="showSolution()">
+        Show Solution
+      </button>
+
+      <button class="secondary" onclick="newProblem()">
+        New Example
+      </button>
+
+
+      <!-- Hint -->
+
+      <div id="hint" class="result hidden"></div>
+
+
+      <!-- Solution -->
+
+      <div id="solution" class="result hidden"></div>
+
+
+      <!-- Student answer -->
+
+      <div class="answer-section">
+
+        <label for="studentAnswer">
+          Enter your answer:
+        </label>
+
+        <p>
+          Enter both roots separated by a comma.
+          For example: <strong>2, 3</strong>
+        </p>
+
+        <input
+          id="studentAnswer"
+          type="text"
+          placeholder="Example: 2, 3"
+        >
+
+        <button onclick="checkAnswer()">
+          Check Answer
+        </button>
+
+        <button class="secondary" onclick="clearAnswer()">
+          Clear
+        </button>
+
+        <div
+          id="feedback"
+          class="result hidden"
+          aria-live="polite">
+        </div>
+
+      </div>
+
+
+      <p class="note">
+        Current prototype: the example problems and answer checking
+        are built into the website. AI-generated questions,
+        hints, and explanations will be added in the next stage.
+      </p>
+
+    </section>
+
+  </main>
+
+
+  <footer>
+    Mathematics learning through differentiated practice
+  </footer>
+
+
+  <script>
+
+    /*
+      ============================================
+      QUADRATIC EQUATION DATA
+      ============================================
+    */
+
+    const levels = {
+
+      foundation: {
+
+        title: "LEVEL 1 — FOUNDATION",
+
+        description:
+          "Solve a simple quadratic equation using factorisation.",
+
+        problems: [
+
+          {
+            question: "x² − 5x + 6 = 0",
+
+            answers: ["2", "3"],
+
+            hint:
+              "Find two numbers that multiply to 6 and add to -5.",
+
+            solution:
+              "(x − 2)(x − 3) = 0\n" +
+              "x − 2 = 0 or x − 3 = 0\n" +
+              "Therefore, x = 2 or x = 3."
+          },
+
+
+          {
+            question: "x² − 7x + 12 = 0",
+
+            answers: ["3", "4"],
+
+            hint:
+              "Find two numbers that multiply to 12 and add to -7.",
+
+            solution:
+              "(x − 3)(x − 4) = 0\n" +
+              "Therefore, x = 3 or x = 4."
+          }
+
+        ]
+      },
+
+
+      standard: {
+
+        title: "LEVEL 2 — STANDARD",
+
+        description:
+          "Solve the quadratic equation by factorising the expression.",
+
+        problems: [
+
+          {
+            question: "2x² − 7x + 3 = 0",
+
+            answers: ["1/2", "3"],
+
+            hint:
+              "Look for two binomials whose product gives 2x² − 7x + 3.",
+
+            solution:
+              "(2x − 1)(x − 3) = 0\n" +
+              "2x − 1 = 0 or x − 3 = 0\n" +
+              "Therefore, x = 1/2 or x = 3."
+          },
+
+
+          {
+            question: "2x² − 9x + 4 = 0",
+
+            answers: ["1/2", "4"],
+
+            hint:
+              "Try factoring the expression into two binomials.",
+
+            solution:
+              "(2x − 1)(x − 4) = 0\n" +
+              "Therefore, x = 1/2 or x = 4."
+          }
+
+        ]
+      },
+
+
+      advanced: {
+
+        title: "LEVEL 3 — ADVANCED",
+
+        description:
+          "Solve a more challenging quadratic equation and explain the algebraic steps.",
+
+        problems: [
+
+          {
+            question: "3x² − 10x + 3 = 0",
+
+            answers: ["1/3", "3"],
+
+            hint:
+              "Find two numbers with product 9 and sum -10 to split the middle term.",
+
+            solution:
+              "3x² − 9x − x + 3 = 0\n" +
+              "3x(x − 3) − 1(x − 3) = 0\n" +
+              "(3x − 1)(x − 3) = 0\n" +
+              "Therefore, x = 1/3 or x = 3."
+          },
+
+
+          {
+            question: "2x² + x − 6 = 0",
+
+            answers: ["3/2", "-2"],
+
+            hint:
+              "Find two factors of -12 whose sum is 1.",
+
+            solution:
+              "(2x − 3)(x + 2) = 0\n" +
+              "Therefore, x = 3/2 or x = -2."
+          }
+
+        ]
+      }
+
+    };
+
+
+    /*
+      ============================================
+      CURRENT PROBLEM
+      ============================================
+    */
+
+    let currentLevel = "foundation";
+
+    let currentIndex = 0;
+
+
+    /*
+      ============================================
+      SELECT LEVEL
+      ============================================
+    */
+
+    function selectLevel(level) {
+
+      currentLevel = level;
+
+      currentIndex = 0;
+
+      displayProblem();
+
+    }
+
+
+    /*
+      ============================================
+      DISPLAY PROBLEM
+      ============================================
+    */
+
+    function displayProblem() {
+
+      const level = levels[currentLevel];
+
+      const task = level.problems[currentIndex];
+
+
+      document.getElementById("level").textContent =
+        level.title;
+
+
+      document.getElementById("description").textContent =
+        level.description;
+
+
+      document.getElementById("problem").textContent =
+        task.question;
+
+
+      document.getElementById("hint").textContent =
+        "Hint: " + task.hint;
+
+
+      document.getElementById("solution").textContent =
+        "Worked Solution:\n" + task.solution;
+
+
+      document.getElementById("hint").classList.add("hidden");
+
+      document.getElementById("solution").classList.add("hidden");
+
+
+      clearAnswer();
+
+    }
+
+
+    /*
+      ============================================
+      SHOW HINT
+      ============================================
+    */
+
+    function showHint() {
+
+      document
+        .getElementById("hint")
+        .classList.remove("hidden");
+
+    }
+
+
+    /*
+      ============================================
+      SHOW SOLUTION
+      ============================================
+    */
+
+    function showSolution() {
+
+      document
+        .getElementById("solution")
+        .classList.remove("hidden");
+
+    }
+
+
+    /*
+      ============================================
+      NEW PROBLEM
+      ============================================
+    */
+
+    function newProblem() {
+
+      const problems =
+        levels[currentLevel].problems;
+
+
+      currentIndex =
+        (currentIndex + 1) % problems.length;
+
+
+      displayProblem();
+
+    }
+
+
+    /*
+      ============================================
+      CONVERT STUDENT INPUT TO A NUMBER
+      ============================================
+    */
+
+    function parseRoot(value) {
+
+      value = value.trim().replace(/\s/g, "");
+
+
+      /*
+        Handle fractions such as 1/2
+      */
+
+      if (value.includes("/")) {
+
+        const parts = value.split("/");
+
+
+        if (parts.length !== 2) {
+          return NaN;
+        }
+
+
+        const numerator =
+          Number(parts[0]);
+
+
+        const denominator =
+          Number(parts[1]);
+
+
+        if (
+          !Number.isFinite(numerator) ||
+          !Number.isFinite(denominator) ||
+          denominator === 0
+        ) {
+
+          return NaN;
+
+        }
+
+
+        return numerator / denominator;
+
+      }
+
+
+      /*
+        Handle normal numbers
+      */
+
+      return Number(value);
+
+    }
+
+
+    /*
+      ============================================
+      CHECK STUDENT ANSWER
+      ============================================
+    */
+
+    function checkAnswer() {
+
+      const input =
+        document.getElementById("studentAnswer").value;
+
+
+      const feedback =
+        document.getElementById("feedback");
+
+
+      feedback.classList.remove("hidden");
+
+      feedback.classList.remove("correct");
+
+      feedback.classList.remove("incorrect");
+
+
+      /*
+        Check whether the student entered something
+      */
+
+      if (input.trim() === "") {
+
+        feedback.textContent =
+          "Please enter both roots.";
+
+        feedback.classList.add("incorrect");
+
+        return;
+
+      }
+
+
+      /*
+        Convert the student's two answers into numbers
+      */
+
+      const studentRoots =
+        input.split(",").map(parseRoot);
+
+
+      /*
+        Get the correct answers
+      */
+
+      const correctRoots =
+        levels[currentLevel]
+          .problems[currentIndex]
+          .answers
+          .map(parseRoot);
+
+
+      /*
+        Check input format
+      */
+
+      if (
+        studentRoots.length !== 2 ||
+        studentRoots.some(
+          root => !Number.isFinite(root)
+        )
+      ) {
+
+        feedback.textContent =
+          "Please enter both roots separated by a comma.\n" +
+          "Example: 2, 3";
+
+        feedback.classList.add("incorrect");
+
+        return;
+
+      }
+
+
+      /*
+        Compare the answers.
+        The order does not matter.
+      */
+
+      const correct =
+        studentRoots.every(
+          root =>
+            correctRoots.some(
+              answer =>
+                Math.abs(root - answer) < 0.000001
+            )
+        )
+        &&
+        correctRoots.every(
+          answer =>
+            studentRoots.some(
+              root =>
+                Math.abs(root - answer) < 0.000001
+            )
+        );
+
+
+      /*
+        Give feedback
+      */
+
+      if (correct) {
+
+        feedback.textContent =
+          "Correct! Well done. Both roots are correct.";
+
+        feedback.classList.add("correct");
+
+      }
+
+      else {
+
+        feedback.textContent =
+          "Not quite. Try again, or use the Show Hint button for guidance.";
+
+        feedback.classList.add("incorrect");
+
+      }
+
+    }
+
+
+    /*
+      ============================================
+      CLEAR ANSWER
+      ============================================
+    */
+
+    function clearAnswer() {
+
+      document.getElementById("studentAnswer").value = "";
+
+
+      const feedback =
+        document.getElementById("feedback");
+
+
+      feedback.textContent = "";
+
+      feedback.classList.add("hidden");
+
+      feedback.classList.remove("correct");
+
+      feedback.classList.remove("incorrect");
+
+    }
+
+
+    /*
+      ============================================
+      LOAD INITIAL PROBLEM
+      ============================================
+    */
+
+    displayProblem();
+
+  </script>
+
+</body>
+</html>
